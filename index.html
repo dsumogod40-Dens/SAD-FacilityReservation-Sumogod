@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard - Facility Reservation System</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="navbar-brand">
+      <img src="logo.png" alt="Logo" class="navbar-logo" />
+      <h1>Facility Reservation and Approval System</h1>
+    </div>
+    <div class="nav-links">
+      <div class="user-info">
+        <span id="userNameLabel">-</span>
+        <span id="userRoleLabel" class="badge">-</span>
+      </div>
+      <button id="navFacilities" class="active">Facilities</button>
+      <button id="navReservations">Reservations</button>
+      <button id="navAudit" data-roles="Administrator">Audit Log</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- DASHBOARD CARDS -->
+    <div class="dashboard-cards">
+      <div class="card">
+        <h3>Total Facilities</h3>
+        <p id="statTotal">0</p>
+      </div>
+      <div class="card">
+        <h3>Active</h3>
+        <p id="statActive">0</p>
+      </div>
+      <div class="card overdue">
+        <h3>Pending Requests</h3>
+        <p id="statPending">0</p>
+      </div>
+      <div class="card">
+        <h3>Scheduled</h3>
+        <p id="statScheduled">0</p>
+      </div>
+      <div class="card">
+        <h3>Completed</h3>
+        <p id="statCompleted">0</p>
+      </div>
+    </div>
+
+    <!-- ============ FACILITIES PANEL ============ -->
+    <div class="panel" id="facilitiesPanel">
+      <div class="panel-header">
+        <h2>Facilities</h2>
+        <div class="controls">
+          <button class="btn btn-primary" data-roles="Administrator" onclick="openFacilityModal()">+ Add Facility</button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Facility Name</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Capacity</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="facilitiesTableBody"></tbody>
+      </table>
+      <div id="facilitiesEmptyState" class="empty-state hidden">No facility records found.</div>
+    </div>
+
+    <!-- ============ RESERVATIONS PANEL ============ -->
+    <div class="panel hidden" id="reservationsPanel">
+      <div class="panel-header">
+        <h2>Reservations</h2>
+        <div class="controls">
+          <button class="btn btn-primary" data-roles="Requester" onclick="openReservationModal()">+ New Reservation</button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Facility</th>
+            <th>Purpose</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="reservationsTableBody"></tbody>
+      </table>
+      <div id="reservationsEmptyState" class="empty-state hidden">No reservations found.</div>
+    </div>
+
+    <!-- ============ AUDIT LOG PANEL (Administrator only) ============ -->
+    <div class="panel hidden" id="auditPanel" data-roles="Administrator">
+      <div class="panel-header">
+        <h2>Audit Log</h2>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Action</th>
+            <th>Table</th>
+            <th>Record ID</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="auditLogsTableBody"></tbody>
+      </table>
+      <div id="auditLogsEmptyState" class="empty-state hidden">No audit log entries found.</div>
+    </div>
+
+  </div>
+
+  <!-- ============ FACILITY MODAL (Add/Edit) ============ -->
+  <div class="modal-overlay" id="facilityModalOverlay">
+    <div class="modal-box">
+      <h3 id="facilityModalTitle">Add Facility</h3>
+      <form id="facilityForm">
+        <input type="hidden" id="facilityId" />
+
+        <label for="facilityName">Facility Name</label>
+        <input type="text" id="facilityName" required />
+
+        <label for="facilityType">Type</label>
+        <input type="text" id="facilityType" placeholder="e.g. Meeting Room, Laboratory" />
+
+        <label for="facilityLocation">Location</label>
+        <input type="text" id="facilityLocation" />
+
+        <label for="facilityCapacity">Capacity</label>
+        <input type="number" id="facilityCapacity" min="1" />
+
+        <label for="facilityCondition">Status</label>
+        <select id="facilityCondition">
+          <option value="Active">Active</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+
+        <p id="facilityFormError" class="error-message"></p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeFacilityModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ RESERVATION MODAL (New Reservation) ============ -->
+  <div class="modal-overlay" id="reservationModalOverlay">
+    <div class="modal-box">
+      <h3>New Reservation Request</h3>
+      <form id="reservationForm">
+
+        <label for="resFacility">Facility</label>
+        <select id="resFacility" required></select>
+
+        <label for="resPurpose">Purpose</label>
+        <textarea id="resPurpose" rows="2" placeholder="e.g. Department meeting"></textarea>
+
+        <label for="resStart">Start Date &amp; Time</label>
+        <input type="datetime-local" id="resStart" required />
+
+        <label for="resEnd">End Date &amp; Time</label>
+        <input type="datetime-local" id="resEnd" required />
+
+        <p id="reservationFormError" class="error-message"></p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeReservationModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Supabase JS Library (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="facilities.js"></script>
+  <script src="reservations.js"></script>
+  <script src="audit.js"></script>
+
+  <script>
+    // ---- Tab switching ----
+    const navFacilities = document.getElementById("navFacilities");
+    const navReservations = document.getElementById("navReservations");
+    const navAudit = document.getElementById("navAudit");
+    const facilitiesPanel = document.getElementById("facilitiesPanel");
+    const reservationsPanel = document.getElementById("reservationsPanel");
+    const auditPanel = document.getElementById("auditPanel");
+
+    function switchTab(activeBtn, activePanel) {
+      [navFacilities, navReservations, navAudit].forEach(b => b.classList.remove("active"));
+      [facilitiesPanel, reservationsPanel, auditPanel].forEach(p => p.classList.add("hidden"));
+      activeBtn.classList.add("active");
+      activePanel.classList.remove("hidden");
+    }
+
+    navFacilities.addEventListener("click", () => switchTab(navFacilities, facilitiesPanel));
+    navReservations.addEventListener("click", () => {
+      switchTab(navReservations, reservationsPanel);
+      loadReservations();
+    });
+    navAudit.addEventListener("click", () => {
+      switchTab(navAudit, auditPanel);
+      loadAuditLogs();
+    });
+
+    // ---- Page init: require login, load profile, then load data ----
+    (async () => {
+      const session = await requireLogin();
+      if (!session) return;
+
+      await loadCurrentUserProfile();
+      await loadDashboardStats();
+      await loadFacilities();
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Login - Facility Reservation System</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="has-bg">
+
+  <div class="login-container">
+    <img src="logo.png" alt="Logo" class="login-logo" />
+    <h1>Facility Reservation and Approval System</h1>
+    <h2>Login</h2>
+
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" required placeholder="Enter your email" />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" required placeholder="Enter your password" />
+
+      <button type="submit">Login</button>
+
+      <p id="errorMessage" class="error-message"></p>
+    </form>
+
+    <div class="hint-box">
+      <strong>Test accounts:</strong><br />
+      admin@gmail.com &mdash; Administrator<br />
+      staff@test.com &mdash; Facility Staff<br />
+      requester@test.com &mdash; Requester
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>
